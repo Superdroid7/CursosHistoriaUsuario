@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Funcional Bloque 2</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #66fcf1; }
+        h1, h2 { color: #45a29e; }
+        .step { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Manual Funcional: Novedades del Bloque 2</h1>
+    <p>¡El sistema ya tiene su propia aduana de seguridad funcional!</p>
+
+    <h2>¿Qué hace el sistema ahora?</h2>
+    <ul>
+        <li><strong>Público vs Privado:</strong> Todo lo que hicimos en el Bloque 1 (Cursos, Categorías, y la vista de Swagger) <strong>ya no pide contraseña</strong>. Cualquier usuario visitante puede entrar libremente.</li>
+        <li><strong>Autenticación Real (JWT):</strong> Ahora existe un proceso de Login de verdad para administradores. La aplicación te otorga un "Token" que actúa como un pase VIP.</li>
+        <li><strong>Administrador por Defecto:</strong> El sistema ahora se autoconfigura creando un administrador cuando lo arrancas. Las credenciales son:<br><br>
+        <strong>Email:</strong> <code>admin@ias.com</code> <br>
+        <strong>Contraseña:</strong> <code>admin123</code>
+        </li>
+    </ul>
+
+    <h2>¿Cómo probarlo en Swagger?</h2>
+    <div class="step">
+        <strong>Paso 1:</strong> Entra a <code>http://localhost:8080/swagger-ui.html</code>. ¡Verás que ya no salta la molesta ventana blanca pidiendo contraseña predeterminada!
+    </div>
+    <div class="step">
+        <strong>Paso 2:</strong> Busca la nueva sección <strong>Authentication</strong> y abre el endpoint verde <code>POST /api/auth/login</code>.
+    </div>
+    <div class="step">
+        <strong>Paso 3:</strong> Dale click a "Try it out". En el cuadro de texto del Request Body, pon el email y password correctos:
+        <br><br>
+        <code>
+        {<br>
+        &nbsp;&nbsp;"email": "admin@ias.com",<br>
+        &nbsp;&nbsp;"password": "admin123"<br>
+        }
+        </code>
+    </div>
+    <div class="step">
+        <strong>Paso 4:</strong> Presiona "Execute". Verás que el servidor te responde con un código <code>200 OK</code> y un texto largo (que parece una mezcla aleatoria de letras y números): <strong>¡Ese es tu Token JWT!</strong> Es tu pase VIP que dura 24 horas.
+    </div>
+    
+    <p style="text-align: center; margin-top: 40px; color: #888;">En el próximo bloque de historias (CRUD de cursos), usaremos ese código (Token) para darle permiso a Swagger de crear y borrar contenido. ¡Avanzando firme hacia el Bloque 3!</p>
+</div>
+</body>
+</html>

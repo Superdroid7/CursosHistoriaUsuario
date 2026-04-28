@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis del Archivo application.yml</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #45a29e; }
+        h1, h2 { color: #66fcf1; }
+        .code-line { background: #000; padding: 10px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #45a29e; font-family: Consolas, monospace; color: #a6e22e; }
+        .explanation { margin-bottom: 25px; padding-left: 15px; border-left: 2px solid #2b2b2b; }
+        .variable { color: #fd971f; }
+        .default { color: #f92672; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Anatomía del application.yml</h1>
+    <p>A continuación, desglosaremos línea por línea el "Menú de Configuraciones" de tu aplicación. Presta mucha atención a la sintaxis <code>${VARIABLE:VALOR_POR_DEFECTO}</code>. Esta sintaxis mágica le dice a la aplicación: <em>"Busca esta VARIABLE en el entorno (ej. en tu servidor de la nube). Si no la encuentras, usa el VALOR_POR_DEFECTO que está después de los dos puntos."</em></p>
+
+    <h2>1. Configuración Principal y Base de Datos</h2>
+    
+    <div class="code-line">spring:</div>
+    <div class="code-line">&nbsp;&nbsp;application:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;name: IAScursos</div>
+    <div class="explanation">
+        Agrupa todas las configuraciones nativas de Spring Boot. Aquí simplemente le estamos dando un nombre interno a nuestra aplicación ("IAScursos").
+    </div>
+
+    <div class="code-line">&nbsp;&nbsp;datasource:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/iascursos}</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;username: ${SPRING_DATASOURCE_USERNAME:postgres}</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;password: ${SPRING_DATASOURCE_PASSWORD:postgres}</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;driver-class-name: org.postgresql.Driver</div>
+    <div class="explanation">
+        Esta es la brújula para encontrar tu Base de Datos PostgreSQL. Usa las variables mágicas. Por ejemplo, si en la nube configuras <span class="variable">SPRING_DATASOURCE_USERNAME</span> como "admin", usará "admin". Si estás en tu PC y no existe esa variable, usará el valor por defecto: <span class="default">postgres</span>. El <code>driver-class-name</code> es el motor interno que Spring usa para hablar el idioma de PostgreSQL.
+    </div>
+
+    <h2>2. Configuración de JPA e Hibernate (El ORM)</h2>
+
+    <div class="code-line">&nbsp;&nbsp;jpa:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;hibernate:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ddl-auto: update</div>
+    <div class="explanation">
+        <strong>ddl-auto: update</strong> es una instrucción clave. Le dice a Hibernate (la herramienta que traduce tus clases de Java a tablas de base de datos): <em>"Revisa mis clases Java. Si hay una clase nueva (como Admin) y no existe la tabla en PostgreSQL, créala automáticamente. Si añadí una columna, actualiza la tabla."</em>
+    </div>
+
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;properties:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hibernate:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dialect: org.hibernate.dialect.PostgreSQLDialect</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;format_sql: true</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;show-sql: true</div>
+    <div class="explanation">
+        El <strong>dialect</strong> le dice a Hibernate qué versión/dialecto exacto de SQL debe escribir (en este caso PostgreSQL). <strong>show-sql</strong> y <strong>format_sql</strong> le ordenan a la aplicación que imprima en tu consola todas las consultas (SELECT, INSERT, UPDATE) que hace a la base de datos en tiempo real, formateadas de forma bonita para que puedas leerlas mientras el programa corre.
+    </div>
+
+    <h2>3. Documentación (Swagger)</h2>
+
+    <div class="code-line">springdoc:</div>
+    <div class="code-line">&nbsp;&nbsp;swagger-ui:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;path: /swagger-ui.html</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;operationsSorter: method</div>
+    <div class="code-line">&nbsp;&nbsp;api-docs:</div>
+    <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;path: /v3/api-docs</div>
+    <div class="explanation">
+        Configura la herramienta SpringDoc. <strong>swagger-ui.path</strong> define la URL exacta que pones en tu navegador para ver la interfaz visual. <strong>operationsSorter: method</strong> hace que los endpoints en la página se ordenen alfabéticamente por su método HTTP (DELETE, GET, POST, PUT). <strong>api-docs.path</strong> es la ruta interna de la que Swagger saca la información en formato JSON crudo para armar la página visual.
+    </div>
+
+    <h2>4. Seguridad (JSON Web Tokens)</h2>
+
+    <div class="code-line">jwt:</div>
+    <div class="code-line">&nbsp;&nbsp;secret: ${JWT_SECRET:404E6352...}</div>
+    <div class="code-line">&nbsp;&nbsp;expiration: ${JWT_EXPIRATION:86400000}</div>
+    <div class="explanation">
+        Estos son valores personalizados que nosotros creamos (no son nativos de Spring, sino creados por nosotros para nuestro <code>JwtService</code>). <strong>secret</strong> es la llave maestra ultra secreta (un código hexadecimal muy largo) que se usa para firmar y verificar si un Token es auténtico o fue falsificado. <strong>expiration</strong> es el tiempo de vida del Token en milisegundos (86400000 milisegundos equivalen exactamente a 24 horas). Al igual que la base de datos, si los configuras en la nube usando variables de entorno, sobreescribirán los valores por defecto.
+    </div>
+
+</div>
+</body>
+</html>
