@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Errores y Soluciones - Bloque 3</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ff4c4c; }
+        h1, h2 { color: #ff4c4c; }
+        .error-block { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ff4c4c; }
+        .solution-block { background: #001f1f; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; margin-top: 0; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-bottom: 10px; }
+        .tag-ide { background-color: #6a0dad; color: white; }
+        .tag-decision { background-color: #27ae60; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Registro de Errores y Soluciones: Bloque 3</h1>
+    <p>Documentación de las dificultades técnicas enfrentadas durante el desarrollo del <strong>CRUD de Cursos</strong>.</p>
+
+    <h2>Dificultad 1: Error de Importación io.jsonwebtoken</h2>
+    <div class="error-block">
+        <span class="tag tag-ide">IDE / Dependencias</span>
+        <p><strong>El problema:</strong> Al crear la clase <code>JwtService.java</code>, el IDE arrojó líneas rojas con el mensaje: <code>The import io.jsonwebtoken cannot be resolved</code>, imposibilitando compilar la creación de los tokens JWT.</p>
+    </div>
+    <div class="solution-block">
+        <p><strong>La solución:</strong> Similar al incidente del Bloque 1, fue un problema de desincronización. Habíamos agregado exitosamente <code>jjwt-api</code>, <code>jjwt-impl</code> y <code>jjwt-jackson</code> al <code>build.gradle</code>. Se resolvió forzando al editor a releer el archivo Gradle para descargar las librerías a la caché local de Java.</p>
+    </div>
+
+    <h2>Dificultad 2: Gestión de Archivos para la Decisión del Tipo de Borrado</h2>
+    <div class="error-block">
+        <span class="tag tag-decision">Diseño Arquitectónico</span>
+        <p><strong>El problema:</strong> En el plan de arquitectura surgió la pregunta de si los cursos debían eliminarse de raíz (Hard Delete) o solo ocultarse para guardar un historial de auditoría (Soft Delete). Se eligió el Soft Delete, pero se generó la necesidad de guardar el código del Hard Delete "por si acaso", sin que esto ensucie el código principal ni se suba a GitHub.</p>
+    </div>
+    <div class="solution-block">
+        <p><strong>La solución:</strong> Se implementó el Soft Delete añadiendo el campo <code>isActive</code> en la base de datos y creando filtros personalizados en <code>JpaCourseRepository</code>. Para resolver el almacenamiento del código descartado, se creó un archivo "Scratch" (borrador temporal) llamado <code>hard_delete_backup.java</code> en un directorio local ignorado por Git, conteniendo el algoritmo nativo de borrado por ID.</p>
+    </div>
+</div>
+</body>
+</html>

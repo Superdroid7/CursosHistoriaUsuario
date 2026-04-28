@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica Bloque 4</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
+        h1, h2, h3 { color: #0a9396; }
+        .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
+        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Reporte de Misión: Bloque 4 - Gestión de Categorías (CRUD)</h1>
+    <p>Hemos implementado la infraestructura para gestionar libremente las Categorías del sistema y hemos aplicado reglas de integridad referencial estrictas para evitar que los datos se corrompan.</p>
+
+    <h2>1. Arquitectura del CRUD (Categorías)</h2>
+    <ul>
+        <li><strong>Hard Delete (Borrado Físico):</strong> A diferencia de los cursos, para las categorías se eligió el borrado permanente real (usando <code>deleteById</code> en JPA).</li>
+        <li><strong>Validación de Integridad Restrictiva:</strong> En el Caso de Uso (<code>AdminCategoryUseCase</code>) implementamos una regla estricta: antes de intentar borrar una categoría, hacemos una consulta para ver si hay cursos amarrados a ella. Si los hay, lanzamos una excepción <code>IllegalStateException</code> y bloqueamos la transacción devolviendo un código HTTP <code>409 Conflict</code>.</li>
+        <li><strong>El DTO (CategoryRequest):</strong> Validamos que no nos puedan enviar el nombre en blanco usando la validación nativa <code>@NotBlank</code>.</li>
+    </ul>
+
+    <h2>2. Bloques de Código Clave</h2>
+    <div class="analogy">
+        <strong>Analogía de League of Legends:</strong> Las reglas estrictas de borrado que creamos son como las Torres de Nexo. Imagina que el Nexo (La Categoría) quiere ser destruido por el equipo enemigo (El Administrador intentando borrar). El sistema no le va a dejar atacar al Nexo si aún están en pie las Torres del Nexo (Los cursos asignados a esa categoría). El administrador se verá forzado a eliminar los cursos primero o reasignarlos antes de poder derribar la categoría.
+    </div>
+
+    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <ul>
+        <li><strong>@PostMapping / @PutMapping:</strong> Reciben y mutan los datos.</li>
+        <li><strong>ResponseEntity.status(HttpStatus.CONFLICT):</strong> Es la forma elegante en que nuestro controlador REST le dice a un cliente web (React/Angular): <em>"Hay un choque de información (conflicto), no puedo borrar esta categoría"</em>.</li>
+    </ul>
+</div>
+</body>
+</html>

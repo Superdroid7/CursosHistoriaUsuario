@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Funcional Bloque 4</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #66fcf1; }
+        h1, h2 { color: #45a29e; }
+        .step { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .alert { background: #331515; border-left: 4px solid #ff4c4c; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Manual Funcional: Gestionando Categorías</h1>
+    <p>¡El sistema ya permite administrar categorías de verdad, completando así la posibilidad de crear cursos reales!</p>
+
+    <h2>¿Qué hace el sistema ahora?</h2>
+    <ul>
+        <li><strong>Crear y Editar Categorías:</strong> El administrador puede definir las categorías base de la plataforma (ej. Desarrollo, Marketing, Finanzas).</li>
+        <li><strong>Borrado Físico:</strong> Si eliminas una categoría, esta desaparecerá por completo para siempre (Hard Delete).</li>
+        <li><strong>Seguro de Vida (Anticorrupción):</strong> El sistema te impedirá borrar una categoría si tienes cursos publicados dentro de ella. Esto evita que tu base de datos se rompa o que tus cursos queden flotando en el limbo.</li>
+    </ul>
+
+    <h2>Guía de Pruebas en Swagger</h2>
+    
+    <div class="step">
+        <strong>Paso 1: Autorizar y Crear Categoría</strong><br>
+        1. Consigue tu token en <code>/api/auth/login</code> y ponlo en el botón <strong>Authorize</strong> de arriba.<br>
+        2. Ve a <code>POST /api/admin/categories</code> y crea una categoría enviando un JSON como este:<br>
+        <code>{ "name": "Programación" }</code><br>
+        Anota el ID que te devuelve el sistema (por ejemplo, el ID será 1).
+    </div>
+
+    <div class="step">
+        <strong>Paso 2: Crear un Curso (Por fin)</strong><br>
+        Ve a <code>POST /api/admin/courses</code> (del bloque 3 que no pudimos probar antes) y ahora sí, crea tu curso asignándole el ID de la categoría que acabas de crear:
+        <br><br>
+        <code>
+        {<br>
+        &nbsp;&nbsp;"title": "Curso Java",<br>
+        &nbsp;&nbsp;"description": "Aprende backend",<br>
+        &nbsp;&nbsp;"imageUrl": "link.png",<br>
+        &nbsp;&nbsp;"courseUrl": "link.com",<br>
+        &nbsp;&nbsp;"categoryId": 1<br>
+        }
+        </code>
+    </div>
+
+    <div class="step">
+        <strong>Paso 3: Probar el Seguro de Vida</strong><br>
+        Ahora intenta borrar la Categoría 1 usando <code>DELETE /api/admin/categories/1</code>. Verás que Swagger te devuelve un error en rojo con el código <code>409 Conflict</code>. ¡El sistema de seguridad funciona y te está impidiendo destruir la categoría porque "Curso Java" sigue dentro de ella!
+    </div>
+</div>
+</body>
+</html>

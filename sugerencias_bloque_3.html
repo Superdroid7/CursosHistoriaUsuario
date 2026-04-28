@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias Bloque 3</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ffba08; }
+        h1, h2 { color: #ffba08; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #45a29e; font-family: Consolas, monospace; }
+        pre { background: #000; padding: 15px; border-radius: 5px; color: #a6e22e; overflow-x: auto; }
+        .path { font-size: 0.9em; color: #ffba08; background: #331515; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sugerencias y Expansiones - Bloque 3 (CRUD de Cursos)</h1>
+    
+    <h2>1. Implementar Subida Física de Imágenes (AWS S3 o Cloudinary)</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\java\com\crusos\infrastructure\adapter\in\web\AdminCourseController.java</span></p>
+    <p>Actualmente pasamos la URL como un texto en el JSON. Para subir imágenes desde la computadora del administrador, debes cambiar el endpoint para recibir <code>MultipartFile</code>.</p>
+    <pre><code>// Modificar en AdminCourseController.java:
+@PostMapping(consumes = { "multipart/form-data" })
+public ResponseEntity&lt;Course&gt; createCourse(
+    @RequestParam("title") String title,
+    @RequestParam("image") MultipartFile imageFile) { // <- Aquí viene el archivo real
+    
+    // 1. Llamar a Amazon S3 o Cloudinary Service para subir 'imageFile'
+    // 2. Te devuelven un link: String url = s3Service.upload(imageFile);
+    // 3. Guardas esa URL en la base de datos.
+}</code></pre>
+
+    <h2>2. Restaurar un Curso Borrado</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\java\com\crusos\application\usecase\AdminCourseUseCase.java</span></p>
+    <p>Ya que elegiste un Borrado Lógico (isActive=false), el curso sigue ahí. Podríamos hacer un endpoint para "Deshacer el borrado" y revivir el curso mágicamente.</p>
+    <pre><code>// Añadir en AdminCourseUseCase.java:
+public void restoreCourse(Long id) {
+    Course course = courseRepositoryPort.findById(id)
+        .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+        
+    course.setIsActive(true); // ¡El curso revive y vuelve al catálogo público!
+    courseRepositoryPort.save(course);
+}</code></pre>
+</div>
+</body>
+</html>

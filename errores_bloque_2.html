@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Errores y Soluciones - Bloque 2</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ff4c4c; }
+        h1, h2 { color: #ff4c4c; }
+        .error-block { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ff4c4c; }
+        .solution-block { background: #001f1f; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; margin-top: 0; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-bottom: 10px; }
+        .tag-ux { background-color: #e67e22; color: white; }
+        .tag-sec { background-color: #c0392b; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Registro de Errores y Soluciones: Bloque 2</h1>
+    <p>Documentación de las dificultades técnicas enfrentadas durante el desarrollo de la <strong>Seguridad JWT</strong>.</p>
+
+    <h2>Dificultad 1: Falta de Contexto para Iniciar Sesión en Swagger</h2>
+    <div class="error-block">
+        <span class="tag tag-ux">Experiencia de Usuario</span>
+        <p><strong>El problema:</strong> Una vez activamos la seguridad de Spring, todos los endpoints requerían un Token JWT. Sin embargo, no teníamos credenciales (correo/contraseña) registradas en la base de datos para ingresar, dejando el sistema hermético. El usuario de Swagger no sabía qué datos poner.</p>
+    </div>
+    <div class="solution-block">
+        <p><strong>La solución:</strong> Se creó la clase <code>DataInitializer.java</code>, que implementa <code>CommandLineRunner</code>. Este componente actúa como una "semilla" (seed). Al arrancar el servidor, verifica si existe un administrador; si no lo hay, crea automáticamente el usuario maestro <code>admin@ias.com</code> con la contraseña <code>admin123</code>. Esto resolvió el bloqueo y permitió la generación del Token.</p>
+    </div>
+
+    <h2>Dificultad 2: Configuración del Secreto JWT en el archivo YML</h2>
+    <div class="error-block">
+        <span class="tag tag-sec">Seguridad / Configuración</span>
+        <p><strong>El problema:</strong> La firma de los Tokens JWT necesita una "Clave Secreta" muy larga. Colocar esta clave quemada directamente en el código Java es una mala práctica de seguridad que vulnera el sistema si el código fuente es robado.</p>
+    </div>
+    <div class="solution-block">
+        <p><strong>La solución:</strong> El desconocimiento inicial sobre el archivo <code>application.yml</code> se resolvió con documentación. Se movió la clave secreta y el tiempo de expiración (24h) a este archivo YAML utilizando las variables <code>jwt.secret</code> y <code>jwt.expiration</code>. De este modo, en producción, la clave se reemplazará por verdaderas variables de entorno del servidor, manteniendo el código Java limpio y blindado.</p>
+    </div>
+</div>
+</body>
+</html>

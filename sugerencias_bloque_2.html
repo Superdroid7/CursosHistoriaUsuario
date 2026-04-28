@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias Bloque 2</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ffba08; }
+        h1, h2 { color: #ffba08; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #45a29e; font-family: Consolas, monospace; }
+        pre { background: #000; padding: 15px; border-radius: 5px; color: #a6e22e; overflow-x: auto; }
+        .path { font-size: 0.9em; color: #ffba08; background: #331515; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sugerencias y Expansiones - Bloque 2 (Autenticación JWT)</h1>
+    
+    <h2>1. Cambiar la Contraseña Quemada del Administrador</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\java\com\crusos\infrastructure\config\DataInitializer.java</span></p>
+    <p>Actualmente, el administrador se crea automáticamente con la clave "admin123". Si quieres añadir otro administrador o poner contraseñas más seguras antes de subir a producción, modifica este archivo.</p>
+    <pre><code>// Modificar en DataInitializer.java (línea ~27)
+Admin defaultAdmin = Admin.builder()
+        .email("director@tuacademia.com")
+        .passwordHash(passwordEncoder.encode("ContraseñaSúperSegura2026!"))
+        .role("SUPERADMIN")
+        .build();</code></pre>
+
+    <h2>2. Refrescar el Token (Refresh Token)</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\java\com\crusos\infrastructure\adapter\in\web\AuthController.java</span></p>
+    <p>El token actual dura 24 horas por defecto. En sistemas bancarios o muy seguros, el token dura 15 minutos, pero existe un endpoint para renovarlo sin que el usuario tenga que volver a poner su contraseña cada rato.</p>
+    <pre><code>// Añadir en AuthController.java:
+@PostMapping("/refresh")
+public ResponseEntity&lt;AuthResponse&gt; refreshToken(@RequestBody RefreshRequest request) {
+    // Lógica para validar el refresh token antiguo y emitir uno nuevo.
+}</code></pre>
+</div>
+</body>
+</html>
