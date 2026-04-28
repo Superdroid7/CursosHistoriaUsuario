@@ -19,4 +19,6 @@ public class Course {
     private Category category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Builder.Default
+    private Boolean isActive = true;
 }

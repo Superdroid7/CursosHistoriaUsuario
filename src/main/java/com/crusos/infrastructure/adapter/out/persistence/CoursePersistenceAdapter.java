@@ -19,7 +19,14 @@ public class CoursePersistenceAdapter implements CourseRepositoryPort {
     private final CategoryPersistenceAdapter categoryAdapter;
 
     @Override
-    public List<Course> findAll() {
+    public List<Course> findAllActive() {
+        return jpaCourseRepository.findByIsActiveTrue().stream()
+                .map(this::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Course> findAllAdmin() {
         return jpaCourseRepository.findAll().stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
@@ -27,7 +34,7 @@ public class CoursePersistenceAdapter implements CourseRepositoryPort {
 
     @Override
     public List<Course> findByCategoryId(Long categoryId) {
-        return jpaCourseRepository.findByCategoryId(categoryId).stream()
+        return jpaCourseRepository.findByCategoryIdAndIsActiveTrue(categoryId).stream()
                 .map(this::toDomain)
                 .collect(Collectors.toList());
     }
@@ -54,6 +61,7 @@ public class CoursePersistenceAdapter implements CourseRepositoryPort {
                 .category(categoryAdapter.toDomain(entity.getCategory()))
                 .createdAt(entity.getCreatedAt())
                 .updatedAt(entity.getUpdatedAt())
+                .isActive(entity.getIsActive())
                 .build();
     }
 
@@ -68,6 +76,7 @@ public class CoursePersistenceAdapter implements CourseRepositoryPort {
                 .category(categoryAdapter.toEntity(course.getCategory()))
                 .createdAt(course.getCreatedAt())
                 .updatedAt(course.getUpdatedAt())
+                .isActive(course.getIsActive())
                 .build();
     }
 }

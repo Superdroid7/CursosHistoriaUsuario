@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica Bloque 3</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
+        h1, h2, h3 { color: #0a9396; }
+        .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
+        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Reporte de Misión: Bloque 3 - Gestión de Cursos (CRUD)</h1>
+    <p>La capacidad operativa de nuestra base está lista. Hemos habilitado a los administradores para crear, modificar y dar de baja los recursos (Cursos) en el campo de batalla.</p>
+
+    <h2>1. Arquitectura del CRUD (Create, Read, Update, Delete)</h2>
+    <ul>
+        <li><strong>Soft Delete (Borrado Lógico):</strong> A petición, el borrado no elimina la información física de la base de datos (Hard Delete). En cambio, le dimos a la entidad <code>Course</code> un campo <code>isActive</code>. Cuando borramos un curso, simplemente cambiamos <code>isActive</code> a false.</li>
+        <li><strong>Filtros Automáticos:</strong> Actualizamos los puertos y el adaptador de persistencia para que la vista pública (visitantes) solo reciba los cursos donde <code>isActive = true</code>. El administrador sí puede ver el listado histórico completo en su panel interno.</li>
+        <li><strong>El DTO (CourseRequest):</strong> Usamos un Objeto de Transferencia de Datos con anotaciones como <code>@NotBlank</code> y <code>@NotNull</code> para validar que no intenten crear un curso sin título o sin categoría (Historia de Usuario 014).</li>
+    </ul>
+
+    <h2>2. Bloques de Código Clave</h2>
+    <div class="analogy">
+        <strong>Analogía de League of Legends:</strong> El "Soft Delete" (Borrado Lógico) es como cuando matan a un campeón. El campeón no es borrado del código del juego ni desaparece para siempre de la partida (Hard Delete); simplemente cambia su estado a "Muerto" (isActive = false) temporalmente. El servidor sigue sabiendo que existe, sus estadísticas se guardan, y puedes verlo en la tabla de puntajes (Panel de Admin), pero no puede interactuar en el mapa público.
+    </div>
+
+    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <ul>
+        <li><strong>@Valid:</strong> Se usa en el controlador para decirle a Spring: <em>"Antes de dejar pasar estos datos, revisa el DTO y asegúrate de que cumple las reglas de validación (que no vengan vacíos)".</em></li>
+        <li><strong>@SecurityRequirement:</strong> Le informa a Swagger que esta ruta específica necesita un Token JWT para funcionar, activando el candadito visual en la interfaz.</li>
+    </ul>
+</div>
+</body>
+</html>

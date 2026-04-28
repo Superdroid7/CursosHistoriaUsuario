@@ -14,7 +14,7 @@ public class GetPublicCoursesUseCase {
     private final CourseRepositoryPort courseRepositoryPort;
 
     public List<Course> getAllCourses() {
-        return courseRepositoryPort.findAll();
+        return courseRepositoryPort.findAllActive();
     }
 
     public List<Course> getCoursesByCategory(Long categoryId) {

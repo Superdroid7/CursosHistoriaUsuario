@@ -37,4 +37,8 @@ public class CourseEntity {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isActive = true;
 }
