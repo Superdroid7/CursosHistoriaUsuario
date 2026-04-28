@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Funcional Bloque 6</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #66fcf1; }
+        h1, h2 { color: #45a29e; }
+        .step { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .alert { background: #331515; border-left: 4px solid #ff4c4c; padding: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Manual Funcional: Validaciones de Usuario</h1>
+    <p>Hemos activado escudos protectores. Ya no puedes guardar cursos con información defectuosa.</p>
+
+    <h2>Guía de Pruebas en Swagger</h2>
+    
+    <div class="step">
+        <strong>Paso 1: Provocar el escudo de validación (HU-014)</strong><br>
+        1. Inicia sesión en Swagger con tu token.<br>
+        2. Intenta crear un Curso nuevo, pero en el campo <code>courseUrl</code> escribe simplemente <code>"www.google.com"</code> (sin el https).<br>
+        3. Presiona Execute.<br>
+        <strong>Resultado esperado:</strong> El sistema rechazará la petición y verás un JSON formateado de la siguiente manera:<br>
+        <pre><code>{
+  "message": "Error de validación en los campos enviados",
+  "data": {
+    "courseUrl": "El formato de la URL es incorrecto, debe incluir http o https"
+  }
+}</code></pre>
+    </div>
+
+    <div class="step">
+        <strong>Paso 2: Comprobar el mensaje de éxito (HU-015)</strong><br>
+        1. Ahora corrige el JSON y pon una URL válida como <code>"https://www.google.com"</code>.<br>
+        2. Ejecuta nuevamente.<br>
+        <strong>Resultado esperado:</strong> En lugar de recibir solo los datos del curso, ahora recibirás el mensaje visual empaquetado confirmando tu acción:<br>
+        <pre><code>{
+  "message": "Curso creado exitosamente",
+  "data": {
+    "id": 5,
+    "title": "Curso...",
+    ...
+  }
+}</code></pre>
+    </div>
+</div>
+</body>
+</html>

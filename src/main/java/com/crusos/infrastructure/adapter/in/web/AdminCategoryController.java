@@ -2,6 +2,7 @@ package com.crusos.infrastructure.adapter.in.web;
 
 import com.crusos.application.usecase.AdminCategoryUseCase;
 import com.crusos.domain.model.Category;
+import com.crusos.infrastructure.adapter.in.web.dto.ApiResponse;
 import com.crusos.infrastructure.adapter.in.web.dto.CategoryRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,32 +26,32 @@ public class AdminCategoryController {
 
     @GetMapping
     @Operation(summary = "Listar todas las categorías", description = "Obtiene todas las categorías.")
-    public ResponseEntity<List<Category>> getAllCategoriesAdmin() {
-        return ResponseEntity.ok(adminCategoryUseCase.getAllCategoriesAdmin());
+    public ResponseEntity<ApiResponse<List<Category>>> getAllCategoriesAdmin() {
+        return ResponseEntity.ok(new ApiResponse<>("Lista de categorías obtenida exitosamente", adminCategoryUseCase.getAllCategoriesAdmin()));
     }
 
     @PostMapping
     @Operation(summary = "Crear categoría", description = "Crea una nueva categoría.")
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<Category>> createCategory(@Valid @RequestBody CategoryRequest request) {
         Category created = adminCategoryUseCase.createCategory(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>("Categoría creada exitosamente", created));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Editar categoría", description = "Actualiza una categoría existente.")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<Category>> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryRequest request) {
         Category updated = adminCategoryUseCase.updateCategory(id, request);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(new ApiResponse<>("Categoría actualizada exitosamente", updated));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar categoría (Borrado físico)", description = "Elimina una categoría. Falla si la categoría tiene cursos asociados.")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         try {
             adminCategoryUseCase.deleteCategory(id);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(new ApiResponse<>("Categoría eliminada permanentemente con éxito", null));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage(), null));
         }
     }
 }
