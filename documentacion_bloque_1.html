@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Bloque 1 - IAS Cursos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            border-left: 5px solid #8b0000;
+        }
+        h1, h2, h3 {
+            color: #ff4c4c;
+        }
+        h1 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .analogy {
+            background: #2a2a2a;
+            border-left: 4px solid #ffaa00;
+            padding: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            border-radius: 4px;
+        }
+        code {
+            background: #2d2d2d;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #66d9ef;
+            font-family: Consolas, monospace;
+        }
+        .code-block {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: Consolas, monospace;
+        }
+        .annotation {
+            color: #a6e22e;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: square;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Reporte de Misión: Bloque 1 - Fundación Hexagonal</h1>
+    <p>Agente, aquí tienes el reporte detallado de la primera fase de construcción de nuestro Sistema de Cursos. Hemos establecido la base operativa, mapeado las entidades clave y asegurado los corredores de comunicación.</p>
+
+    <div class="analogy">
+        <strong>Analogía de Supervivencia (Resident Evil):</strong> Construir una arquitectura hexagonal es como explorar la Mansión Spencer. Primero necesitas el mapa central y las llaves maestras (El Dominio). Si empiezas por abrir las puertas exteriores (Controladores o Base de Datos) sin conocer el mapa interno, los zombis (el código espagueti) te devorarán.
+    </div>
+
+    <h2>1. Orden de Creación: ¿Por qué este camino?</h2>
+    <p>Hemos seguido una secuencia estricta basada en los principios de <em>Clean Architecture</em> (Arquitectura Hexable/Hexagonal):</p>
+    <ul>
+        <li><strong>Primero: El Dominio (Category y Course).</strong> Como las hierbas verdes y rojas de Resident Evil, son los elementos vitales que no dependen de nada más. Aquí se define "qué es un curso" sin importar si se guarda en Postgres o en un archivo de texto.</li>
+        <li><strong>Segundo: Puertos de Salida (Interfaces de Repositorio).</strong> Estas son las ranuras para insertar las Llaves del Castillo. El dominio dice "necesito guardar un curso", pero no le importa cómo. Solo deja la ranura (la interfaz) lista.</li>
+        <li><strong>Tercero: Casos de Uso (Application).</strong> Son nuestras armas. Un caso de uso toma un curso (munición) y lo usa a través de una interfaz.</li>
+        <li><strong>Cuarto: Infraestructura (JPA, Entidades de BD y Controladores).</strong> Finalmente construimos los pasillos exteriores. Aquí es donde conectamos la Base de Datos (PostgreSQL) usando variables de entorno (como un maletín de almacenamiento seguro en la nube) y creamos los endpoints (puertas) para que los usuarios puedan entrar.</li>
+    </ul>
+
+    <h2>2. Bloques de Código y su Función</h2>
+    
+    <h3>El Dominio Puro (Modelos)</h3>
+    <div class="code-block">
+public class Course {
+    private Long id;
+    private String title;
+    // ...
+}
+    </div>
+    <p>Objetos limpios de Java (POJOs). No saben nada de Spring Boot ni de bases de datos. Son la verdad absoluta de nuestro negocio.</p>
+
+    <h3>Los Casos de Uso (GetPublicCoursesUseCase)</h3>
+    <p>Esta clase representa la intención del usuario. Si la historia de usuario dice "El visitante quiere ver todos los cursos", esta clase ejecuta exactamente eso llamando al puerto de base de datos.</p>
+
+    <h3>La Infraestructura: Adaptadores y Entidades</h3>
+    <div class="analogy">
+        <strong>Analogía de Invocador (League of Legends):</strong> El Adaptador de Persistencia (<code>CoursePersistenceAdapter</code>) es como Sylas. Roba la información del Dominio (Poder Mágico) y la traduce o adapta al formato que entiende la Base de Datos (JPA Entity), actuando como un puente entre ambos mundos.
+    </div>
+    <p>Creamos <code>CourseEntity</code> y <code>CategoryEntity</code> específicamente para la base de datos. El adaptador toma nuestro modelo de dominio puro, lo convierte en Entity, lo guarda en la BD, y cuando lo recuperamos, lo vuelve a convertir a Dominio.</p>
+
+    <h2>3. El Arsenal: Uso de Anotaciones</h2>
+    <p>A lo largo de este bloque hemos utilizado potentes hechizos (anotaciones) proporcionados por nuestros frameworks (Spring Boot, Lombok, SpringDoc):</p>
+
+    <ul>
+        <li><span class="annotation">@Entity</span> y <span class="annotation">@Table(name="...")</span>: Marcan una clase como una tabla de base de datos. Como ponerle un sello de "Propiedad de Umbrella Corp" a la clase para que Hibernate sepa cómo guardarla.</li>
+        <li><span class="annotation">@RestController</span> y <span class="annotation">@RequestMapping</span>: Abren una puerta de enlace pública (API REST) hacia el mundo exterior, escuchando peticiones HTTP.</li>
+        <li><span class="annotation">@Data</span>, <span class="annotation">@Builder</span>, <span class="annotation">@RequiredArgsConstructor</span>: Magia de <strong>Lombok</strong>. Reducen el código repetitivo (getters, setters, constructores) para que nuestro código no parezca un laberinto de Silent Hill. Al usar <code>@RequiredArgsConstructor</code>, Spring inyecta automáticamente las dependencias (como los puertos o repositorios) sin necesidad de escribir constructores manuales o usar <code>@Autowired</code>.</li>
+        <li><span class="annotation">@Tag</span> y <span class="annotation">@Operation</span>: Munición de <strong>SpringDoc (Swagger)</strong>. Documentan automáticamente nuestras rutas. Es como encontrar un mapa del juego pegado en la pared: cualquiera que lea la documentación sabrá exactamente qué hace cada Endpoint.</li>
+    </ul>
+
+    <div class="analogy">
+        <strong>Para la Base de Datos en la Nube (La Niebla de Silent Hill):</strong>
+        <p>En el archivo <code>application.yml</code>, configuré las variables de entorno de esta manera: <code>url: ${SPRING_DATASOURCE_URL:...}</code>. Esto significa que cuando despliegues tu aplicación y uses una base de datos en la nube (como <strong>Supabase</strong>, <strong>Neon.tech</strong> o <strong>Railway</strong>), solo tendrás que configurar esas variables secretas en tu plataforma de hosting (Render, Heroku, etc.), sin necesidad de cambiar una sola línea de código o exponer tus contraseñas en GitHub. El sistema buscará esas variables mágicas, y si no las encuentra, usará el localhost por defecto.</p>
+    </div>
+
+    <p style="text-align: center; margin-top: 40px; color: #777;">Fin del reporte. Preparado para la siguiente directiva.</p>
+</div>
+
+</body>
+</html>

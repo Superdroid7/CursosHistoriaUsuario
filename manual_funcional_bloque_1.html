@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Funcional - Bloque 1 - IAS Cursos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #1f2833;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            border-top: 5px solid #66fcf1;
+        }
+        h1, h2, h3 {
+            color: #45a29e;
+        }
+        h1 {
+            border-bottom: 2px solid #45a29e;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+        .alert-box {
+            background: #2b2b2b;
+            border-left: 5px solid #ff4c4c;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .alert-box.info {
+            border-left-color: #66fcf1;
+        }
+        code {
+            background: #000;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: #66fcf1;
+            font-family: Consolas, monospace;
+        }
+        .step {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Manual Funcional y Contexto General (Bloque 1)</h1>
+    <p>Bienvenido al Manual Funcional. A diferencia de la documentación técnica (que explica el código), este documento te explica <strong>qué hace tu sistema hoy</strong>, cómo interactuar con él como usuario y por qué se comporta de ciertas maneras.</p>
+
+    <h2>1. ¿Qué sabe hacer el sistema actualmente?</h2>
+    <p>Hemos completado la <strong>Épica 1: Visualización pública de cursos</strong>. A nivel de funcionalidades reales, tu sistema ahora mismo cuenta con:</p>
+    <ul>
+        <li><strong>Una base de datos conectada:</strong> Las tablas virtuales para Cursos y Categorías ya existen, aunque actualmente están vacías.</li>
+        <li><strong>Endpoint Público de Cursos:</strong> Si le pides al sistema "dame todos los cursos" (usando la ruta <code>/api/public/courses</code>), el sistema irá a la base de datos y te devolverá la lista.</li>
+        <li><strong>Filtro de Cursos:</strong> Puedes pedirle al sistema "dame los cursos de la categoría X" y sabrá filtrarlos.</li>
+        <li><strong>Endpoint Público de Categorías:</strong> Puedes pedirle la lista de categorías disponibles para alimentar el filtro de tu Landing Page en el futuro (ruta <code>/api/public/categories</code>).</li>
+    </ul>
+
+    <h2>2. El "Problema" de Swagger: ¿Por qué me pide contraseña?</h2>
+    <div class="alert-box">
+        <strong>El Sistema de Defensa de Spring Security (El Muro de Demacia)</strong><br>
+        En tu archivo de configuración (<code>build.gradle</code>), tienes instalada una dependencia llamada <code>spring-boot-starter-security</code>. Esta herramienta es como un guardia de seguridad paranoico que, por defecto, <strong>bloquea absolutamente todo el sistema</strong> (incluso la documentación de Swagger) hasta que le enseñes una identificación.
+    </div>
+
+    <p>Como aún no hemos llegado a la <strong>Épica 2</strong> (donde programaremos el login de Administrador de verdad con contraseñas reales y bases de datos), Spring Boot genera una contraseña aleatoria de emergencia cada vez que arranca la aplicación.</p>
+
+    <h3>¿Cómo entro a Swagger ahora mismo?</h3>
+    <div class="step">
+        <strong>Paso 1:</strong> Ve a tu consola (terminal de PowerShell donde corriste <code>.\gradlew bootRun</code>).
+    </div>
+    <div class="step">
+        <strong>Paso 2:</strong> Busca entre los textos blancos de inicio una línea que dice algo como:<br>
+        <code>Using generated security password: 6a8d7e9f-1234-abcd-5678-90abcdef1234</code>
+    </div>
+    <div class="step">
+        <strong>Paso 3:</strong> Ve a Swagger (<code>http://localhost:8080/swagger-ui.html</code>). Cuando te pida credenciales, ingresa:<br>
+        <ul>
+            <li><strong>Username:</strong> <code>user</code></li>
+            <li><strong>Password:</strong> Pega la contraseña generada que encontraste en la consola.</li>
+        </ul>
+    </div>
+
+    <div class="alert-box info">
+        <strong>Nota sobre el Futuro (Bloque 2):</strong><br>
+        En el próximo bloque vamos a "educar" a este guardia de seguridad. Le enseñaremos que la ruta de Swagger y las rutas <code>/api/public/...</code> deben estar abiertas para todos sin pedir contraseña. Y crearemos el sistema de Login real donde tú definirás tu propio usuario y clave de administrador.
+    </div>
+
+    <h2>3. ¿Cómo probar lo que hemos hecho?</h2>
+    <p>Una vez que logres entrar a Swagger, verás dos pestañas (Endpoints):</p>
+    <ul>
+        <li><strong>GET /api/public/courses:</strong> Al expandirlo y presionar "Try it out" y luego "Execute", verás que el sistema te responde con un código <code>200 OK</code> y un arreglo vacío <code>[]</code>. Esto es correcto, ¡porque el sistema funciona, pero aún no has creado cursos!</li>
+        <li><strong>GET /api/public/categories:</strong> Hará lo mismo, devolviendo un arreglo vacío de categorías.</li>
+    </ul>
+    
+    <p style="text-align: center; margin-top: 40px; color: #888;">Este manual te servirá de brújula a medida que el sistema crezca. ¡Estamos listos para el Bloque 2!</p>
+</div>
+
+</body>
+</html>
