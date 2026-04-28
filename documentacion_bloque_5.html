@@ -9,30 +9,48 @@
         .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
         h1, h2, h3 { color: #0a9396; }
         .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
-        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+        pre { background: #2b2b2b; padding: 15px; border-radius: 5px; color: #f8f8f2; overflow-x: auto; border: 1px solid #444; }
+        code { font-family: Consolas, monospace; }
+        ul li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Reporte de Misión: Bloque 5 - Gestión de Imágenes Físicas</h1>
-    <p>Hemos habilitado el sistema de archivos del servidor para almacenar imágenes reales. Esto completa la HU-013 permitiendo mejorar la estética visual de la landing page.</p>
+    <p>Hemos habilitado el sistema de archivos del servidor para almacenar imágenes reales. Esto requirió interactuar con el sistema operativo (Windows/Linux) usando la librería Java NIO (New I/O).</p>
 
-    <h2>1. Arquitectura de Almacenamiento (I/O)</h2>
+    <h2>1. Anatomía de la Ubicación de Archivos (Path)</h2>
+    <p>En el archivo <code>FileSystemStorageAdapter.java</code> necesitamos crear la carpeta "uploads" de forma automática si no existe.</p>
+<pre><code>Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+Files.createDirectories(fileStorageLocation);</code></pre>
     <ul>
-        <li><strong>Separación de Responsabilidades:</strong> Fieles a la arquitectura limpia, creamos <code>FileStoragePort</code> en la capa de Dominio, de manera que la lógica de negocio solo sabe que "necesita guardar un archivo". La implementación técnica recae en <code>FileSystemStorageAdapter</code> en la capa de Infraestructura.</li>
-        <li><strong>Rutas Estáticas:</strong> Spring Boot por defecto no muestra carpetas internas del disco duro. Tuvimos que usar un configurador de MVC (<code>WebConfig.java</code>) para mapear virtualmente el tráfico de <code>/uploads/**</code> a la carpeta física del proyecto.</li>
-        <li><strong>Seguridad de Archivos:</strong> Para evitar colisiones (dos fotos llamadas igual) o ataques, el sistema renombra el archivo entrante agregándole un identificador único global (<code>UUID</code>).</li>
+        <li><strong>¿Qué es la clase Path?</strong> Hasta ahora, para manejar textos usábamos <code>String</code>. Pero un <code>Path</code> no es una simple cadena de texto; es un objeto avanzado y especializado que representa una "ruta" literal dentro del disco duro de tu computadora (ej: <code>C:/Users/.../uploads</code>). El objeto Path sabe cómo navegar por directorios, cómo devolverse hacia atrás y cómo leer los permisos del disco.</li>
+        <li><strong>Paths.get("uploads"):</strong> Le dice a Java que apunte o localice la carpeta llamada "uploads" en la raíz del proyecto.</li>
+        <li><strong>Files.createDirectories:</strong> Es la orden directa que ejecuta Java para decirle al Sistema Operativo de tu PC que cree esa carpeta físicamente si aún no existe.</li>
     </ul>
 
-    <h2>2. Bloques de Código Clave</h2>
+    <h2>2. Recepción y Sobreescritura de Archivos</h2>
+<pre><code>public String storeFile(MultipartFile file) {
+    String fileName = UUID.randomUUID().toString() + "_" + originalName;
+    Path targetLocation = this.fileStorageLocation.resolve(fileName);
+    Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+    ...
+}</code></pre>
+    <ul>
+        <li><strong>MultipartFile:</strong> Cuando envías un JSON, viaja por internet como un texto simple. Pero cuando envías una foto, esta viaja troceada en pedacitos binarios. <code>MultipartFile</code> es la clase mágica de Spring capaz de atrapar esos pedazos desde la red y reensamblar la imagen original.</li>
+        <li><strong>UUID:</strong> Si dos administradores distintos suben una foto llamada <code>perrito.png</code>, la segunda sobreescribiría y destruiría a la primera en la carpeta. Para evitar este caos, usamos la clase <code>UUID</code> (Identificador Único Universal), que genera un código alfanumérico gigante e irrepetible (ej: <code>550e8400-e29b_perrito.png</code>) para que cada archivo tenga un nombre único mundialmente.</li>
+        <li><strong>Files.copy:</strong> Toma el flujo de datos líquidos de la imagen (<code>InputStream</code>) y los copia físicamente en la ubicación que designamos en el disco duro.</li>
+    </ul>
     <div class="analogy">
-        <strong>Analogía de Resident Evil:</strong> El servidor es la Mansión Spencer. Antes, guardábamos información (Cursos) en un cuaderno (Base de datos). Ahora, hemos creado un Baúl de Inventario Físico (la carpeta `uploads/`). Cuando subes una foto, la guardas en el baúl y anotas en tu cuaderno la combinación para encontrarla (la URL de la imagen). 
+        <strong>Analogía de Resident Evil:</strong> Imagina que el <code>MultipartFile</code> es una Hierba Verde que recoges en el suelo de la Mansión Spencer. Mientras la tienes en la mano, es algo temporal y volátil. El <code>Path</code> es saber exactamente el mapa, en qué sala y en qué piso está la caja segura (el Baúl de inventario). La clase <code>UUID</code> es ponerle una etiqueta única a tu hierba para no confundirla con las otras millones que guardes. Y finalmente, <code>Files.copy</code> es la animación física de abrir el baúl y depositar la hierba adentro para resguardarla permanentemente.
     </div>
 
-    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <h2>3. Exposición de Recursos (WebMvcConfigurer)</h2>
+    <p>Por temas de extrema seguridad, Spring Boot actúa como un búnker cerrado y bloquea el acceso a todas las carpetas internas de tu proyecto. En <code>WebConfig.java</code> abrimos un pequeño conducto de ventilación seguro.</p>
+<pre><code>registry.addResourceHandler("/uploads/**")
+        .addResourceLocations("file:" + uploadAbsolutePath + "/");</code></pre>
     <ul>
-        <li><strong>consumes = "multipart/form-data":</strong> Le dice explícitamente a Spring que este endpoint no va a recibir texto JSON convencional, sino "pedazos" binarios (una imagen).</li>
-        <li><strong>@RequestParam("file"):</strong> Extrae el archivo binario enviado en el formulario bajo el campo llamado "file".</li>
+        <li><strong>ResourceHandlerRegistry:</strong> Es un sistema de mapeo y enrutamiento interno. Aquí le damos una instrucción precisa al servidor web: <em>"Si un navegador de internet te solicita una URL que empiece por /uploads/ (ejemplo: localhost:8080/uploads/foto.png), no intentes buscar código Java en un Controlador. En su lugar, ve directamente a buscar el archivo físico en el disco duro (<code>file:</code>) y envíaselo al usuario como una imagen"</em>.</li>
     </ul>
 </div>
 </body>

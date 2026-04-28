@@ -35,8 +35,6 @@ public class AdminCategoryUseCase {
     public void deleteCategory(Long id) {
         categoryRepositoryPort.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
-
-        // Integridad (HU-013)
         List<Course> courses = courseRepositoryPort.findByCategoryId(id);
         if (!courses.isEmpty()) {
             throw new IllegalStateException("No se puede eliminar la categoría porque tiene cursos asociados.");

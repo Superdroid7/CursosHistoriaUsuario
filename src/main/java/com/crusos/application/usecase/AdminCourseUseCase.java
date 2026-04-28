@@ -55,8 +55,6 @@ public class AdminCourseUseCase {
     public void deleteCourse(Long id) {
         Course existingCourse = courseRepositoryPort.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
-        
-        // Borrado lógico (Soft Delete)
         existingCourse.setIsActive(false);
         courseRepositoryPort.save(existingCourse);
     }

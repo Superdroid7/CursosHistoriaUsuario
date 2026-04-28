@@ -34,14 +34,11 @@ public class FileSystemStorageAdapter implements FileStoragePort {
     @Override
     public String storeFile(MultipartFile file) {
         String originalName = StringUtils.cleanPath(file.getOriginalFilename());
-        
-        // Validación básica de tipos
         if (originalName == null || (!originalName.toLowerCase().endsWith(".png") && !originalName.toLowerCase().endsWith(".jpg") && !originalName.toLowerCase().endsWith(".jpeg"))) {
             throw new IllegalArgumentException("Solo se permiten archivos PNG o JPG");
         }
 
         try {
-            // Renombrar archivo para evitar conflictos
             String fileName = UUID.randomUUID().toString() + "_" + originalName;
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);

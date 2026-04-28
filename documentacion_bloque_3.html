@@ -9,30 +9,44 @@
         .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
         h1, h2, h3 { color: #0a9396; }
         .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
-        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+        pre { background: #2b2b2b; padding: 15px; border-radius: 5px; color: #f8f8f2; overflow-x: auto; border: 1px solid #444; }
+        code { font-family: Consolas, monospace; }
+        ul li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Reporte de Misión: Bloque 3 - Gestión de Cursos (CRUD)</h1>
-    <p>La capacidad operativa de nuestra base está lista. Hemos habilitado a los administradores para crear, modificar y dar de baja los recursos (Cursos) en el campo de batalla.</p>
+    <p>En este bloque programamos la lógica para que el administrador pueda crear, editar y ocultar cursos, manteniendo un alto estándar de código limpio y validaciones estrictas.</p>
 
-    <h2>1. Arquitectura del CRUD (Create, Read, Update, Delete)</h2>
+    <h2>1. Borrado Lógico (Soft Delete) vs Físico</h2>
+    <p>Decidimos no borrar los cursos de la base de datos por temas de auditoría, así que añadimos la variable <code>private Boolean isActive;</code> en <code>CourseEntity.java</code>.</p>
     <ul>
-        <li><strong>Soft Delete (Borrado Lógico):</strong> A petición, el borrado no elimina la información física de la base de datos (Hard Delete). En cambio, le dimos a la entidad <code>Course</code> un campo <code>isActive</code>. Cuando borramos un curso, simplemente cambiamos <code>isActive</code> a false.</li>
-        <li><strong>Filtros Automáticos:</strong> Actualizamos los puertos y el adaptador de persistencia para que la vista pública (visitantes) solo reciba los cursos donde <code>isActive = true</code>. El administrador sí puede ver el listado histórico completo en su panel interno.</li>
-        <li><strong>El DTO (CourseRequest):</strong> Usamos un Objeto de Transferencia de Datos con anotaciones como <code>@NotBlank</code> y <code>@NotNull</code> para validar que no intenten crear un curso sin título o sin categoría (Historia de Usuario 014).</li>
+        <li><strong>Borrado Físico (Hard Delete):</strong> Es lanzar un comando <code>DELETE FROM</code> real. La fila desaparece de la base de datos para siempre. Si borras por accidente, necesitas un backup (respaldo).</li>
+        <li><strong>Borrado Lógico (Soft Delete):</strong> Bajo el capó, es un simple comando <code>UPDATE</code>. Cuando el admin da clic en "Borrar", en realidad el sistema cambia la variable a <code>isActive = false</code>. Luego programamos el controlador de la Vista Pública para que solo muestre cursos con <code>isActive = true</code>, dando la ilusión de que se borró, aunque siga ahí para el administrador.</li>
     </ul>
 
-    <h2>2. Bloques de Código Clave</h2>
+    <h2>2. DTO (Data Transfer Object) y Validaciones Automáticas</h2>
+    <p>En el archivo <code>CourseRequest.java</code>:</p>
+<pre><code>public class CourseRequest {
+    @NotBlank(message = "El título es obligatorio")
+    private String title;
+}</code></pre>
+    <ul>
+        <li><strong>DTO (Data Transfer Object):</strong> Es un objeto "mensajero". No es una tabla de base de datos (Entidad) ni es el núcleo del negocio (Modelo). Es solo una mochila temporal para transportar la información (JSON) que el usuario manda desde su navegador web hasta el Controlador de Java.</li>
+        <li><strong>@NotBlank y @Valid:</strong> Son anotaciones del paquete <code>jakarta.validation</code>. Actúan como guardias en la puerta del Controlador. Si un usuario intenta enviar un Curso pero deja el título vacío, la anotación intercepta el intento y arroja automáticamente un error HTTP 400 (Bad Request), sin molestar a la base de datos.</li>
+    </ul>
     <div class="analogy">
-        <strong>Analogía de League of Legends:</strong> El "Soft Delete" (Borrado Lógico) es como cuando matan a un campeón. El campeón no es borrado del código del juego ni desaparece para siempre de la partida (Hard Delete); simplemente cambia su estado a "Muerto" (isActive = false) temporalmente. El servidor sigue sabiendo que existe, sus estadísticas se guardan, y puedes verlo en la tabla de puntajes (Panel de Admin), pero no puede interactuar en el mapa público.
+        <strong>Analogía de League of Legends:</strong> Un DTO es como un campeón aliado usando la habilidad "Recall" (Vuelta a base) para llevar oro. Es un transporte seguro de un punto A hacia un punto B. El <code>@Valid</code> funciona exactamente igual que el rayo láser de la Fuente (la zona de inicio de la base): si un enemigo camuflado (datos corruptos o vacíos) intenta colarse usando el transporte de tu aliado, el láser de la Fuente lo detecta y lo calcina al instante antes de que pueda tocar el interior de tu base (tu lógica de negocio).
     </div>
 
-    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <h2>3. Manejo Inteligente de Nulos (Optionals)</h2>
+    <p>En el archivo <code>AdminCourseUseCase.java</code> usamos esto para buscar cursos por ID:</p>
+<pre><code>Course existingCourse = courseRepositoryPort.findById(id)
+    .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));</code></pre>
     <ul>
-        <li><strong>@Valid:</strong> Se usa en el controlador para decirle a Spring: <em>"Antes de dejar pasar estos datos, revisa el DTO y asegúrate de que cumple las reglas de validación (que no vengan vacíos)".</em></li>
-        <li><strong>@SecurityRequirement:</strong> Le informa a Swagger que esta ruta específica necesita un Token JWT para funcionar, activando el candadito visual en la interfaz.</li>
+        <li><strong>Optional:</strong> La función <code>findById</code> de Spring no devuelve el curso pelado; devuelve una "Caja de Schrödinger" llamada <code>Optional</code>. Esa caja puede tener el curso adentro, o puede estar totalmente vacía si el ID no existe en la base de datos. Esto previene el infame error <code>NullPointerException</code> que hace crashear las aplicaciones Java.</li>
+        <li><strong>.orElseThrow():</strong> Le damos una instrucción a la caja: <em>"Intenta sacar el curso de tu interior; pero si por casualidad estás vacía, en lugar de romper todo el sistema de forma caótica, lanza una pequeña excepción (IllegalArgumentException) controlada con un mensaje amigable"</em>.</li>
     </ul>
 </div>
 </body>

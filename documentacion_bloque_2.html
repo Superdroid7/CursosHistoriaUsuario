@@ -9,34 +9,57 @@
         .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
         h1, h2, h3 { color: #0a9396; }
         .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
+        pre { background: #2b2b2b; padding: 15px; border-radius: 5px; color: #f8f8f2; overflow-x: auto; border: 1px solid #444; }
+        code { font-family: Consolas, monospace; }
+        ul li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Reporte de Misión: Bloque 2 - Sistema de Seguridad (JWT)</h1>
-    <p>Agente, la segunda fase está completa. Hemos implementado un sistema de autenticación robusto para separar a los civiles de los operativos autorizados.</p>
+    <h1>Reporte de Misión: Bloque 2 - Seguridad JWT y Filtros</h1>
+    <p>En este bloque instalamos el candado principal del sistema. Nadie entra a los controladores de administrador sin un pase válido.</p>
 
-    <h2>1. Orden de Creación: Protegiendo la base</h2>
+    <h2>1. Filtros de Seguridad (JwtAuthenticationFilter.java)</h2>
+    <p>Este archivo es un vigilante que revisa todas las peticiones entrantes.</p>
+<pre><code>@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
+        ...
+        filterChain.doFilter(request, response);
+    }
+}</code></pre>
     <ul>
-        <li><strong>Dependencias (Armería):</strong> Añadimos <code>jjwt</code> a Gradle para poder fabricar y verificar credenciales digitales (Tokens).</li>
-        <li><strong>Modelo Admin (El VIP):</strong> Creamos la entidad <code>Admin</code> a nivel de Dominio e Infraestructura.</li>
-        <li><strong>Seguridad (El Muro de Demacia):</strong> Creamos los filtros y configuraciones (<code>SecurityConfig</code>, <code>JwtAuthenticationFilter</code>, <code>JwtService</code>). Aquí le dijimos al sistema: "Deja la zona <code>/api/public</code> abierta, pero pon guardias en el resto".</li>
-        <li><strong>Casos de Uso y Controladores (El Control de Acceso):</strong> Implementamos <code>AuthUseCase</code> y <code>AuthController</code> para que los usuarios puedan presentar sus credenciales y recibir su pase de acceso (Token).</li>
-        <li><strong>Data Initializer (El Fundador):</strong> Creamos un script que, al iniciar, inserta un admin si la base de datos está vacía.</li>
+        <li><strong>OncePerRequestFilter:</strong> Es una clase abstracta de Spring que garantiza que este filtro se ejecutará exactamente una vez por cada petición web (para no hacer validaciones dobles y desperdiciar rendimiento).</li>
+        <li><strong>HttpServletRequest:</strong> Contiene toda la información que envió el usuario: su IP, la URL que intenta visitar, y lo más importante: la "cabecera" (header) donde está escondido el Token JWT.</li>
+        <li><strong>FilterChain:</strong> Es el "pase de siga". Si el token es válido, invocamos <code>filterChain.doFilter</code> para que la petición siga su camino hacia el Controlador. Si no lo llamamos, la petición muere ahí mismo (Acceso denegado).</li>
+    </ul>
+    <div class="analogy">
+        <strong>Analogía de Silent Hill 2:</strong> Imagina que el Controlador (el destino final) es la habitación secreta en el hotel. El <code>JwtAuthenticationFilter</code> es Pyramid Head custodiando el pasillo. Cada vez que alguien (una petición web) intenta pasar, Pyramid Head lo detiene y le revisa los bolsillos buscando una carta específica (El Token JWT). Si la carta es válida, Pyramid Head se hace a un lado (<code>filterChain.doFilter</code>) y le deja pasar. Si no la tiene o es falsa, lo ejecuta inmediatamente impidiendo que avance.
+    </div>
+
+    <h2>2. Fabricación del Token JWT (JwtService.java)</h2>
+    <p>Este archivo es el que "imprime" los pases de abordar (Tokens) cuando el admin pone su usuario y contraseña correctamente.</p>
+<pre><code>String token = Jwts.builder()
+    .setSubject(user.getEmail())
+    .setIssuedAt(new Date(System.currentTimeMillis()))
+    .setExpiration(new Date(System.currentTimeMillis() + expiration))
+    .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+    .compact();</code></pre>
+    <ul>
+        <li><strong>setSubject:</strong> Define "de quién" es este token. Usamos el correo electrónico (email) del administrador.</li>
+        <li><strong>setIssuedAt / setExpiration:</strong> Definen la fecha de expedición y caducidad. Si un hacker roba el token, solo le servirá por 24 horas antes de autodestruirse lógicamente.</li>
+        <li><strong>signWith:</strong> Cifra matemáticamente el token usando la Clave Secreta del servidor (inyectada desde <code>application.yml</code>). Si alguien altera una sola letra del token, la firma HS256 se rompe y el sistema detectará que es un token falso.</li>
     </ul>
 
-    <h2>2. Bloques de Código Clave</h2>
-    <div class="analogy">
-        <strong>Analogía de League of Legends:</strong> El <code>JwtAuthenticationFilter</code> es como un Centinela de Control (Pink Ward). Se coloca justo en la entrada de tus rutas y revisa a cada visitante invisible (las peticiones HTTP). Si el visitante no lleva el emblema de tu equipo (un Token JWT válido), el centinela lo rechaza y no le deja interactuar con la torre (el backend).
-    </div>
-    <p>El <code>SecurityConfig</code> es el estratega: desactiva el CSRF (ya que no usamos sesiones sino tokens), establece las reglas de qué rutas son públicas, y posiciona a nuestro filtro Centinela en la cadena de mando.</p>
-
-    <h2>3. Anotaciones Especiales</h2>
+    <h2>3. Semilla de Arranque (DataInitializer.java)</h2>
+<pre><code>@Component
+public class DataInitializer implements CommandLineRunner {
+    @Override
+    public void run(String... args) { ... }
+}</code></pre>
     <ul>
-        <li><strong>@EnableWebSecurity:</strong> Activa el radar de seguridad principal de Spring.</li>
-        <li><strong>@Bean:</strong> Le dice a Spring: "Toma este objeto (como el codificador de contraseñas BCrypt) y guárdalo en tu inventario principal, lo necesitaremos luego".</li>
-        <li><strong>@Value("${jwt.secret}"):</strong> Extrae la llave maestra criptográfica de tu archivo <code>application.yml</code>.</li>
-        <li><strong>@CommandLineRunner:</strong> Convierte una clase en un ejecutable que corre justo después de que la aplicación termina de arrancar, ideal para inyectar al administrador por defecto.</li>
+        <li><strong>CommandLineRunner:</strong> Es una interfaz especial de Spring Boot. Le indica al sistema que, en el instante exacto en que el servidor termina de arrancar, debe ejecutar el código dentro del método <code>run</code>. Lo usamos para crear al administrador <code>admin@ias.com</code> si la base de datos está vacía.</li>
     </ul>
 </div>
 </body>

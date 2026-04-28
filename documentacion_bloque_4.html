@@ -9,30 +9,52 @@
         .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
         h1, h2, h3 { color: #0a9396; }
         .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
-        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+        pre { background: #2b2b2b; padding: 15px; border-radius: 5px; color: #f8f8f2; overflow-x: auto; border: 1px solid #444; }
+        code { font-family: Consolas, monospace; }
+        ul li { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>Reporte de Misión: Bloque 4 - Gestión de Categorías (CRUD)</h1>
-    <p>Hemos implementado la infraestructura para gestionar libremente las Categorías del sistema y hemos aplicado reglas de integridad referencial estrictas para evitar que los datos se corrompan.</p>
+    <p>Hemos implementado la infraestructura para gestionar libremente las Categorías del sistema y hemos aplicado reglas de integridad referencial estrictas para evitar que los datos se corrompan si el usuario comete un error.</p>
 
-    <h2>1. Arquitectura del CRUD (Categorías)</h2>
+    <h2>1. Borrado Físico (Hard Delete)</h2>
+    <p>A diferencia de los cursos (que se ocultaban con isActive), para las categorías aplicamos un borrado físico y letal en <code>CategoryPersistenceAdapter.java</code>.</p>
+<pre><code>public void deleteById(Long id) {
+    jpaCategoryRepository.deleteById(id);
+}</code></pre>
     <ul>
-        <li><strong>Hard Delete (Borrado Físico):</strong> A diferencia de los cursos, para las categorías se eligió el borrado permanente real (usando <code>deleteById</code> en JPA).</li>
-        <li><strong>Validación de Integridad Restrictiva:</strong> En el Caso de Uso (<code>AdminCategoryUseCase</code>) implementamos una regla estricta: antes de intentar borrar una categoría, hacemos una consulta para ver si hay cursos amarrados a ella. Si los hay, lanzamos una excepción <code>IllegalStateException</code> y bloqueamos la transacción devolviendo un código HTTP <code>409 Conflict</code>.</li>
-        <li><strong>El DTO (CategoryRequest):</strong> Validamos que no nos puedan enviar el nombre en blanco usando la validación nativa <code>@NotBlank</code>.</li>
+        <li><strong>deleteById:</strong> Este método nativo de Spring Data JPA envía un comando SQL literal a la base de datos: <code>DELETE FROM categories WHERE id = X</code>. No deja rastro.</li>
     </ul>
 
-    <h2>2. Bloques de Código Clave</h2>
+    <h2>2. Seguro de Vida: Integridad Referencial</h2>
+    <p>Si borráramos una Categoría que tiene cursos adentro de forma física, los cursos se quedarían flotando en el limbo buscando un "padre" que ya no existe (corrupción de datos u orfandad). Para evitarlo, pusimos un seguro en <code>AdminCategoryUseCase.java</code>.</p>
+<pre><code>List&lt;Course&gt; courses = courseRepositoryPort.findByCategoryId(id);
+if (!courses.isEmpty()) {
+    throw new IllegalStateException("No se puede eliminar la categoría...");
+}</code></pre>
+    <ul>
+        <li><strong>courses.isEmpty():</strong> El sistema le pregunta a la base de datos: <em>"Tráeme la lista de todos los cursos que estén amarrados a la categoría que estoy a punto de borrar"</em>. Si la lista devuelta <strong>no</strong> está vacía, el código entra al condicional <code>if</code> y aborta agresivamente la operación lanzando un <code>IllegalStateException</code>. </li>
+    </ul>
     <div class="analogy">
-        <strong>Analogía de League of Legends:</strong> Las reglas estrictas de borrado que creamos son como las Torres de Nexo. Imagina que el Nexo (La Categoría) quiere ser destruido por el equipo enemigo (El Administrador intentando borrar). El sistema no le va a dejar atacar al Nexo si aún están en pie las Torres del Nexo (Los cursos asignados a esa categoría). El administrador se verá forzado a eliminar los cursos primero o reasignarlos antes de poder derribar la categoría.
+        <strong>Analogía de League of Legends:</strong> Las reglas estrictas de borrado que creamos son como la mecánica de inmunidad de las estructuras. Imagina que el Inhibidor enemigo (La Categoría) quiere ser destruido por tu equipo (El Administrador). El sistema del juego no te va a dejar hacerle daño al Inhibidor si aún está en pie la Torreta que lo defiende (Los cursos asignados a esa categoría). El administrador se verá forzado a derribar la Torreta primero (eliminar los cursos o reasignarlos a otra categoría) antes de poder atacar al Inhibidor.
     </div>
 
-    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <h2>3. Manejo Elegante de Errores en el Controlador</h2>
+    <p>¿Qué pasa con ese error que arrojamos arriba? Lo capturamos en <code>AdminCategoryController.java</code> para que no crashee la página.</p>
+<pre><code>@DeleteMapping("/{id}")
+public ResponseEntity&lt;Void&gt; deleteCategory(@PathVariable Long id) {
+    try {
+        adminCategoryUseCase.deleteCategory(id);
+        return ResponseEntity.noContent().build();
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).build();
+    }
+}</code></pre>
     <ul>
-        <li><strong>@PostMapping / @PutMapping:</strong> Reciben y mutan los datos.</li>
-        <li><strong>ResponseEntity.status(HttpStatus.CONFLICT):</strong> Es la forma elegante en que nuestro controlador REST le dice a un cliente web (React/Angular): <em>"Hay un choque de información (conflicto), no puedo borrar esta categoría"</em>.</li>
+        <li><strong>try-catch:</strong> El controlador intenta (try) ejecutar el borrado normal. Si el Caso de Uso (UseCase) estalla de coraje y lanza el <code>IllegalStateException</code>, el controlador atrapa (catch) la bomba antes de que destruya el servidor.</li>
+        <li><strong>HttpStatus.CONFLICT (409):</strong> En lugar de enviar un fatal error 500 al front-end, envía un elegante código 409 Conflict. Esto es el estándar web para decir: <em>"Entendí tu petición, pero choca (entra en conflicto) con las reglas actuales de mis datos"</em>.</li>
     </ul>
 </div>
 </body>
