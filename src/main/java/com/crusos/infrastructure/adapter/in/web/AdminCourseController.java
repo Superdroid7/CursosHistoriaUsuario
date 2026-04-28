@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -48,5 +49,14 @@ public class AdminCourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
         adminCourseUseCase.deleteCourse(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping(value = "/{id}/image", consumes = "multipart/form-data")
+    @Operation(summary = "Subir imagen al curso", description = "Sube un archivo PNG/JPG y actualiza la URL de imagen del curso.")
+    public ResponseEntity<Course> uploadCourseImage(
+            @PathVariable Long id, 
+            @RequestParam("file") MultipartFile file) {
+        Course updated = adminCourseUseCase.uploadCourseImage(id, file);
+        return ResponseEntity.ok(updated);
     }
 }

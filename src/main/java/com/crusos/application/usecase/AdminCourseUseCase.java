@@ -4,9 +4,11 @@ import com.crusos.domain.model.Category;
 import com.crusos.domain.model.Course;
 import com.crusos.domain.port.out.CategoryRepositoryPort;
 import com.crusos.domain.port.out.CourseRepositoryPort;
+import com.crusos.domain.port.out.FileStoragePort;
 import com.crusos.infrastructure.adapter.in.web.dto.CourseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ public class AdminCourseUseCase {
 
     private final CourseRepositoryPort courseRepositoryPort;
     private final CategoryRepositoryPort categoryRepositoryPort;
+    private final FileStoragePort fileStoragePort;
 
     public Course createCourse(CourseRequest request) {
         Category category = categoryRepositoryPort.findById(request.getCategoryId())
@@ -60,5 +63,15 @@ public class AdminCourseUseCase {
 
     public List<Course> getAllCoursesAdmin() {
         return courseRepositoryPort.findAllAdmin();
+    }
+
+    public Course uploadCourseImage(Long id, MultipartFile file) {
+        Course existingCourse = courseRepositoryPort.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Curso no encontrado"));
+
+        String fileUrl = fileStoragePort.storeFile(file);
+        existingCourse.setImageUrl(fileUrl);
+        
+        return courseRepositoryPort.save(existingCourse);
     }
 }

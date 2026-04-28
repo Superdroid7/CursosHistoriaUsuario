@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica Bloque 5</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1e1e1e; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); border-left: 5px solid #005f73; }
+        h1, h2, h3 { color: #0a9396; }
+        .analogy { background: #001219; border-left: 4px solid #ee9b00; padding: 15px; margin: 20px 0; font-style: italic; border-radius: 4px; }
+        code { background: #333; padding: 3px 6px; border-radius: 4px; color: #a8dadc; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Reporte de Misión: Bloque 5 - Gestión de Imágenes Físicas</h1>
+    <p>Hemos habilitado el sistema de archivos del servidor para almacenar imágenes reales. Esto completa la HU-013 permitiendo mejorar la estética visual de la landing page.</p>
+
+    <h2>1. Arquitectura de Almacenamiento (I/O)</h2>
+    <ul>
+        <li><strong>Separación de Responsabilidades:</strong> Fieles a la arquitectura limpia, creamos <code>FileStoragePort</code> en la capa de Dominio, de manera que la lógica de negocio solo sabe que "necesita guardar un archivo". La implementación técnica recae en <code>FileSystemStorageAdapter</code> en la capa de Infraestructura.</li>
+        <li><strong>Rutas Estáticas:</strong> Spring Boot por defecto no muestra carpetas internas del disco duro. Tuvimos que usar un configurador de MVC (<code>WebConfig.java</code>) para mapear virtualmente el tráfico de <code>/uploads/**</code> a la carpeta física del proyecto.</li>
+        <li><strong>Seguridad de Archivos:</strong> Para evitar colisiones (dos fotos llamadas igual) o ataques, el sistema renombra el archivo entrante agregándole un identificador único global (<code>UUID</code>).</li>
+    </ul>
+
+    <h2>2. Bloques de Código Clave</h2>
+    <div class="analogy">
+        <strong>Analogía de Resident Evil:</strong> El servidor es la Mansión Spencer. Antes, guardábamos información (Cursos) en un cuaderno (Base de datos). Ahora, hemos creado un Baúl de Inventario Físico (la carpeta `uploads/`). Cuando subes una foto, la guardas en el baúl y anotas en tu cuaderno la combinación para encontrarla (la URL de la imagen). 
+    </div>
+
+    <h2>3. Anotaciones Clave Utilizadas</h2>
+    <ul>
+        <li><strong>consumes = "multipart/form-data":</strong> Le dice explícitamente a Spring que este endpoint no va a recibir texto JSON convencional, sino "pedazos" binarios (una imagen).</li>
+        <li><strong>@RequestParam("file"):</strong> Extrae el archivo binario enviado en el formulario bajo el campo llamado "file".</li>
+    </ul>
+</div>
+</body>
+</html>

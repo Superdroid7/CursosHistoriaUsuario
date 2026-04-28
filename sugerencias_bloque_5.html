@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sugerencias Bloque 5</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ffba08; }
+        h1, h2 { color: #ffba08; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #45a29e; font-family: Consolas, monospace; }
+        pre { background: #000; padding: 15px; border-radius: 5px; color: #a6e22e; overflow-x: auto; }
+        .path { font-size: 0.9em; color: #ffba08; background: #331515; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Sugerencias y Expansiones - Bloque 5 (Carga de Imágenes)</h1>
+    
+    <h2>1. Implementar Subida a la Nube (AWS S3)</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\java\com\crusos\infrastructure\adapter\out\storage\FileSystemStorageAdapter.java</span></p>
+    <p>Actualmente las fotos se guardan en el disco duro de tu computadora (o del servidor donde alojes la app). Si borras la carpeta, pierdes las fotos. En el mundo real, se usa AWS S3. Para hacerlo, solo tendrías que cambiar la implementación de este adaptador para que se conecte a Amazon usando el SDK de AWS, ¡sin tocar el resto del código gracias a la Arquitectura Hexagonal!</p>
+    
+    <h2>2. Limitar el Tamaño de Archivo</h2>
+    <p><strong>Archivo a modificar:</strong> <span class="path">c:\Users\cuent\Desktop\xd\IAScursos\src\main\resources\application.yml</span></p>
+    <p>Para evitar que un administrador malintencionado suba una imagen de 2 GB y sature tu servidor, debes configurar límites globales en Spring Boot.</p>
+    <pre><code># Añadir al final de application.yml
+spring:
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+</code></pre>
+</div>
+</body>
+</html>

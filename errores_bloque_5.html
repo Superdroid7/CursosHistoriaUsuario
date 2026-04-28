@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Errores y Soluciones - Bloque 5</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0b0c10; color: #c5c6c7; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: #1f2833; padding: 30px; border-radius: 10px; border-top: 5px solid #ff4c4c; }
+        h1, h2 { color: #ff4c4c; }
+        .error-block { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ff4c4c; }
+        .solution-block { background: #001f1f; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; margin-top: 0; }
+        code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; margin-bottom: 10px; }
+        .tag-sec { background-color: #c0392b; color: white; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Registro de Errores y Soluciones: Bloque 5</h1>
+    <p>Documentación de las dificultades técnicas enfrentadas durante el desarrollo de la <strong>HU-013: Carga de Imágenes</strong>.</p>
+
+    <h2>Dificultad 1: Error 401 Unauthorized al visualizar imágenes</h2>
+    <div class="error-block">
+        <span class="tag tag-sec">Seguridad / Autenticación</span>
+        <p><strong>El problema:</strong> Tras subir exitosamente la imagen al servidor, se generó la URL <code>http://localhost:8080/uploads/foto.png</code>. Sin embargo, al intentar abrir este enlace desde el navegador o la landing page pública, el sistema lanzaba un error de acceso denegado (401 Unauthorized).</p>
+    </div>
+    <div class="solution-block">
+        <p><strong>La solución:</strong> El sistema de seguridad de Spring Security (creado en el bloque 2) por defecto bloquea cualquier petición que no tenga un token JWT, incluyendo la carpeta estática. Se tuvo que modificar el archivo <code>SecurityConfig.java</code> para añadir la ruta <code>/uploads/**</code> a la lista de URLs permitidas públicamente (<code>permitAll()</code>).</p>
+    </div>
+</div>
+</body>
+</html>
