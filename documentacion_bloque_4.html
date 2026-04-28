@@ -20,6 +20,7 @@
     <p>Hemos implementado la infraestructura para gestionar libremente las Categorías del sistema y hemos aplicado reglas de integridad referencial estrictas para evitar que los datos se corrompan si el usuario comete un error.</p>
 
     <h2>1. Borrado Físico (Hard Delete)</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-012] Eliminar categoría</span>
     <p>A diferencia de los cursos (que se ocultaban con isActive), para las categorías aplicamos un borrado físico y letal en <code>CategoryPersistenceAdapter.java</code>.</p>
 <pre><code>public void deleteById(Long id) {
     jpaCategoryRepository.deleteById(id);
@@ -29,6 +30,7 @@
     </ul>
 
     <h2>2. Seguro de Vida: Integridad Referencial</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-010 y HU-011] Creación/Edición correcta y [Satisface HU-012] Impedir eliminación si hay cursos</span>
     <p>Si borráramos una Categoría que tiene cursos adentro de forma física, los cursos se quedarían flotando en el limbo buscando un "padre" que ya no existe (corrupción de datos u orfandad). Para evitarlo, pusimos un seguro en <code>AdminCategoryUseCase.java</code>.</p>
 <pre><code>List&lt;Course&gt; courses = courseRepositoryPort.findByCategoryId(id);
 if (!courses.isEmpty()) {

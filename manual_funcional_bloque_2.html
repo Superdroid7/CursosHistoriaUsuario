@@ -10,45 +10,32 @@
         h1, h2 { color: #45a29e; }
         .step { background: #2b2b2b; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #66fcf1; }
         code { background: #000; padding: 3px 6px; border-radius: 4px; color: #66fcf1; font-family: Consolas, monospace; }
+        .hu-tag { background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>Manual Funcional: Novedades del Bloque 2</h1>
-    <p>¡El sistema ya tiene su propia aduana de seguridad funcional!</p>
-
-    <h2>¿Qué hace el sistema ahora?</h2>
-    <ul>
-        <li><strong>Público vs Privado:</strong> Todo lo que hicimos en el Bloque 1 (Cursos, Categorías, y la vista de Swagger) <strong>ya no pide contraseña</strong>. Cualquier usuario visitante puede entrar libremente.</li>
-        <li><strong>Autenticación Real (JWT):</strong> Ahora existe un proceso de Login de verdad para administradores. La aplicación te otorga un "Token" que actúa como un pase VIP.</li>
-        <li><strong>Administrador por Defecto:</strong> El sistema ahora se autoconfigura creando un administrador cuando lo arrancas. Las credenciales son:<br><br>
-        <strong>Email:</strong> <code>admin@ias.com</code> <br>
-        <strong>Contraseña:</strong> <code>admin123</code>
-        </li>
-    </ul>
-
-    <h2>¿Cómo probarlo en Swagger?</h2>
-    <div class="step">
-        <strong>Paso 1:</strong> Entra a <code>http://localhost:8080/swagger-ui.html</code>. ¡Verás que ya no salta la molesta ventana blanca pidiendo contraseña predeterminada!
-    </div>
-    <div class="step">
-        <strong>Paso 2:</strong> Busca la nueva sección <strong>Authentication</strong> y abre el endpoint verde <code>POST /api/auth/login</code>.
-    </div>
-    <div class="step">
-        <strong>Paso 3:</strong> Dale click a "Try it out". En el cuadro de texto del Request Body, pon el email y password correctos:
-        <br><br>
-        <code>
-        {<br>
-        &nbsp;&nbsp;"email": "admin@ias.com",<br>
-        &nbsp;&nbsp;"password": "admin123"<br>
-        }
-        </code>
-    </div>
-    <div class="step">
-        <strong>Paso 4:</strong> Presiona "Execute". Verás que el servidor te responde con un código <code>200 OK</code> y un texto largo (que parece una mezcla aleatoria de letras y números): <strong>¡Ese es tu Token JWT!</strong> Es tu pase VIP que dura 24 horas.
-    </div>
+    <h1>Manual Funcional: Autenticación de Administrador</h1>
     
-    <p style="text-align: center; margin-top: 40px; color: #888;">En el próximo bloque de historias (CRUD de cursos), usaremos ese código (Token) para darle permiso a Swagger de crear y borrar contenido. ¡Avanzando firme hacia el Bloque 3!</p>
+    <h2>Pruebas en Swagger</h2>
+    
+    <div class="step">
+        <span class="hu-tag">[Satisface HU-004]</span><br>
+        <strong>Paso 1: Iniciar Sesión (Login)</strong><br>
+        1. Ve a <code>/api/auth/login</code>.<br>
+        2. Ingresa `admin@ias.com` y `admin`.<br>
+        3. Copia el token JWT generado.<br>
+        <strong>Resultado:</strong> Estás autenticado.
+    </div>
+
+    <div class="step">
+        <span class="hu-tag">[Satisface HU-005]</span><br>
+        <strong>Paso 2: Cerrar Sesión (Logout y Blacklist)</strong><br>
+        1. Ve a <code>/api/auth/logout</code>.<br>
+        2. Presiona Execute teniendo tu token pegado en el candado verde de Swagger.<br>
+        <strong>Resultado:</strong> El servidor responderá con un código HTTP 204 (No Content). El token que estabas usando acaba de ser metido en la tabla de <code>revoked_tokens</code>.<br>
+        3. Intenta usar el MISMO token para crear una categoría. El sistema te arrojará <code>401 Unauthorized</code> confirmando que el token fue invalidado y no sirve más.
+    </div>
 </div>
 </body>
 </html>

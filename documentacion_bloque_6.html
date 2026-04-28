@@ -20,6 +20,7 @@
     <p>Hemos finalizado la Épica 6 y blindado el sistema para que ningún administrador pueda corromper la base de datos por errores de escritura, y para que el frontend siempre reciba mensajes claros.</p>
 
     <h2>1. Captura Global de Errores (@ControllerAdvice)</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-014 y HU-015] Mensajes claros de validación</span>
     <p>En lugar de poner un <code>try-catch</code> en cada uno de nuestros controladores (lo cual ensuciaría el código), usamos una clase mágica llamada <code>GlobalExceptionHandler.java</code>.</p>
 <pre><code>@ControllerAdvice(basePackages = "com.crusos.infrastructure.adapter.in.web")
 public class GlobalExceptionHandler {
@@ -35,6 +36,7 @@ public class GlobalExceptionHandler {
     </div>
 
     <h2>2. Envoltorio Estándar (ApiResponse)</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-015] Ver mensajes de éxito o error en administrador</span>
     <p>Para cumplir la HU-015 de enviar mensajes visuales y estandarizados, creamos la clase <code>ApiResponse.java</code>.</p>
 <pre><code>public class ApiResponse&lt;T&gt; {
     private String message;
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
     </div>
 
     <h2>3. Validación de Protocolos URL (@URL)</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-014] Validar formato correcto de URL</span>
 <pre><code>@URL(protocol = "http", message = "El formato de la URL es incorrecto, debe incluir http o https")
 private String courseUrl;</code></pre>
     <ul>

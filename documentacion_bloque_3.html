@@ -20,6 +20,7 @@
     <p>En este bloque programamos la lógica para que el administrador pueda crear, editar y ocultar cursos, manteniendo un alto estándar de código limpio y validaciones estrictas.</p>
 
     <h2>1. Borrado Lógico (Soft Delete) vs Físico</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-008 y HU-009] Eliminar curso y listar en panel</span>
     <p>Decidimos no borrar los cursos de la base de datos por temas de auditoría, así que añadimos la variable <code>private Boolean isActive;</code> en <code>CourseEntity.java</code>.</p>
     <ul>
         <li><strong>Borrado Físico (Hard Delete):</strong> Es lanzar un comando <code>DELETE FROM</code> real. La fila desaparece de la base de datos para siempre. Si borras por accidente, necesitas un backup (respaldo).</li>
@@ -27,6 +28,7 @@
     </ul>
 
     <h2>2. DTO (Data Transfer Object) y Validaciones Automáticas</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-006 y HU-007] Formulario de Crear y Editar curso</span>
     <p>En el archivo <code>CourseRequest.java</code>:</p>
 <pre><code>public class CourseRequest {
     @NotBlank(message = "El título es obligatorio")

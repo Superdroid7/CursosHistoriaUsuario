@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import com.crusos.infrastructure.adapter.out.persistence.RevokedTokenRepository;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final RevokedTokenRepository revokedTokenRepository;
 
     @Override
     protected void doFilterInternal(
@@ -39,6 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         
         jwt = authHeader.substring(7);
+
+        // HU-005: Validar lista negra
+        if (revokedTokenRepository.findByToken(jwt).isPresent()) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
         userEmail = jwtService.extractUsername(jwt);
         
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

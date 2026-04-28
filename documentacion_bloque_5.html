@@ -20,6 +20,7 @@
     <p>Hemos habilitado el sistema de archivos del servidor para almacenar imágenes reales. Esto requirió interactuar con el sistema operativo (Windows/Linux) usando la librería Java NIO (New I/O).</p>
 
     <h2>1. Anatomía de la Ubicación de Archivos (Path)</h2>
+    <span style="background-color: #2a9d8f; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-bottom: 10px; display: inline-block;">[Satisface HU-013] Cargar imagen para un curso</span>
     <p>En el archivo <code>FileSystemStorageAdapter.java</code> necesitamos crear la carpeta "uploads" de forma automática si no existe.</p>
 <pre><code>Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
 Files.createDirectories(fileStorageLocation);</code></pre>
