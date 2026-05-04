@@ -16,7 +16,7 @@ public class CourseRequest {
     private String imageUrl;
 
     @NotBlank(message = "La URL del curso es obligatoria")
-    @URL(protocol = "http", message = "El formato de la URL es incorrecto, debe incluir http o https")
+    @URL(message = "El formato de la URL es incorrecto, debe incluir http o https")
     private String courseUrl;
 
     @NotNull(message = "El ID de la categoría es obligatorio")

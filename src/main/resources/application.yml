@@ -2,13 +2,13 @@ spring:
   application:
     name: IAScursos
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/iascursos}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: ${DATABASE_URL:jdbc:postgresql://ep-dry-union-a8qce74w-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channelBinding=require}
+    username: ${DATABASE_USERNAME:neondb_owner}
+    password: ${DATABASE_PASSWORD:npg_46QRlWSZGpNE}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -19,6 +19,7 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
+    disable-swagger-default-url: true
   api-docs:
     path: /v3/api-docs
 

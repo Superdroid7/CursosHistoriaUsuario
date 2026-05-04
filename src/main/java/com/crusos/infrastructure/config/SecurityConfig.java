@@ -18,21 +18,40 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
 
+    private static final String[] PUBLIC_PATHS = {
+        "/swagger-ui.html",
+        "/swagger-ui/**",
+        "/v3/api-docs",
+        "/v3/api-docs/**",
+        "/swagger-resources/**",
+        "/webjars/**",
+        "/api/auth/login",
+        "/api/setup/**",
+        "/api/public/**",
+        "/uploads/**"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(401);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\": \"No autorizado\"}");
+                })
+            )
             .authorizeHttpRequests(req -> req
-                .requestMatchers("/api/auth/login").permitAll()
-                .requestMatchers("/api/auth/logout").authenticated()
-                .requestMatchers("/api/public/**", "/swagger-ui/**", "/v3/api-docs/**", "/uploads/**").permitAll()
+                .requestMatchers(PUBLIC_PATHS).permitAll()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
